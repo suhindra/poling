@@ -215,14 +215,6 @@ export default function VoterPage() {
               <div className="voting-header">
                 <h3>🗳️ Pilih Kandidat Anda</h3>
                 <p className="voting-subtitle">Pilih satu kandidat yang akan mewakili posisi {currentPeriod.position?.toUpperCase()}</p>
-                <button 
-                  type="button"
-                  className="btn-refresh"
-                  onClick={() => loadData()}
-                  title="Refresh daftar kandidat"
-                >
-                  🔄
-                </button>
               </div>
               
               <div className="candidates-grid">
