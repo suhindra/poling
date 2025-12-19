@@ -599,9 +599,15 @@ export default function AdminPage() {
                       <td>
                         <div className="positions-badge">
                           {candidate.positions ? (
-                            candidate.positions.split(',').map((pos) => (
-                              <span key={pos} className="badge">{pos.trim()}</span>
-                            ))
+                            typeof candidate.positions === 'string'
+                              ? candidate.positions.split(',').map((pos) => (
+                                  <span key={pos} className="badge">{pos.trim()}</span>
+                                ))
+                              : Array.isArray(candidate.positions)
+                              ? candidate.positions.map((pos) => (
+                                  <span key={pos} className="badge">{pos}</span>
+                                ))
+                              : <span style={{color: '#999'}}>—</span>
                           ) : (
                             <span style={{color: '#999'}}>—</span>
                           )}
