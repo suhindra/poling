@@ -230,18 +230,22 @@ export default function VoterPage() {
                   // Check if this candidate already won/selected in another position
                   const isDisabled = selectedCandidatesOtherPositions.includes(candidate.id)
 
+                  // Hide disabled candidates instead of showing them
+                  if (isDisabled) {
+                    return null
+                  }
+
                   return (
                     <label 
                       key={candidate.id} 
-                      className={`candidate-card ${selectedCandidate === candidate.id ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
+                      className={`candidate-card ${selectedCandidate === candidate.id ? 'selected' : ''}`}
                     >
                       <input
                         type="radio"
                         name="candidate"
                         value={candidate.id}
                         checked={selectedCandidate === candidate.id}
-                        onChange={() => !isDisabled && setSelectedCandidate(candidate.id)}
-                        disabled={isDisabled}
+                        onChange={() => setSelectedCandidate(candidate.id)}
                         style={{display: 'none'}}
                       />
                       <div className="card-photo">
@@ -253,9 +257,6 @@ export default function VoterPage() {
                           </div>
                         )}
                         <div className="card-number-badge">#{candidate.number}</div>
-                        {isDisabled && (
-                          <div className="already-selected-badge">✓ Sudah Terpilih</div>
-                        )}
                       </div>
                       <div className="card-content">
                         <h4 className="candidate-name">{candidate.name}</h4>
