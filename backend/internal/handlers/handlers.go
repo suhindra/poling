@@ -133,7 +133,7 @@ func (h *Handlers) GetCandidatesForPeriod(c *gin.Context) {
 	}
 
 	var candidates []models.Candidate
-	if err := h.db.Where("is_active = ?", true).Find(&candidates).Error; err != nil {
+	if err := h.db.Where("is_active = ?", true).Order("number ASC").Find(&candidates).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch candidates"})
 		return
 	}
@@ -751,4 +751,92 @@ func (h *Handlers) GenerateDummyVotes(c *gin.Context) {
 		"message":    "dummy votes generated successfully",
 		"vote_count": voteCount,
 	})
+}
+
+// RegisterParticipant registers a new participant (public endpoint)
+func (h *Handlers) RegisterParticipant(c *gin.Context) {
+	var req struct {
+		Name        string `json:"name" binding:"required"`
+		NIK         string `json:"nik" binding:"required"`
+		SatuanKerja string `json:"satuan_kerja" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Check if NIK already exists
+	var existing models.Participant
+	if err := h.db.Where("nik = ?", req.NIK).First(&existing).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "NIK already registered"})
+		return
+	}
+
+	participant := models.Participant{
+		Name:        req.Name,
+		NIK:         req.NIK,
+		SatuanKerja: req.SatuanKerja,
+		IsProcessed: false,
+	}
+
+	if err := h.db.Create(&participant).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to register participant"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "registration successful",
+		"id":      participant.ID,
+	})
+}
+
+// GetParticipants returns list of registered participants (admin only)
+func (h *Handlers) GetParticipants(c *gin.Context) {
+	var participants []models.Participant
+	if err := h.db.Order("created_at DESC").Find(&participants).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch participants"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"participants": participants,
+		"total":        len(participants),
+	})
+}
+
+// ExportParticipantsCSV exports participant list as CSV (admin only)
+func (h *Handlers) ExportParticipantsCSV(c *gin.Context) {
+	var participants []models.Participant
+	if err := h.db.Order("created_at").Find(&participants).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to export participants"})
+		return
+	}
+
+	// Generate CSV
+	csv := "No,Nama,NIK,Satuan Kerja,Status,Dibuat\n"
+	for i, p := range participants {
+		status := "Pending"
+		if p.IsProcessed {
+			status = "Processed"
+		}
+		csv += fmt.Sprintf("%d,%s,%s,%s,%s,%s\n",
+			i+1, p.Name, p.NIK, p.SatuanKerja, status, p.CreatedAt.Format("2006-01-02 15:04:05"))
+	}
+
+	c.Header("Content-Disposition", "attachment; filename=participants.csv")
+	c.Header("Content-Type", "text/csv")
+	c.String(http.StatusOK, csv)
+}
+
+// DeleteParticipant deletes a participant (admin only)
+func (h *Handlers) DeleteParticipant(c *gin.Context) {
+	participantID := c.Param("id")
+
+	if err := h.db.Delete(&models.Participant{}, participantID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete participant"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "participant deleted successfully"})
 }

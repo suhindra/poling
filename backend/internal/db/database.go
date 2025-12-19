@@ -27,6 +27,7 @@ func InitDB() (*gorm.DB, error) {
 	if err := db.AutoMigrate(
 		&models.Admin{},
 		&models.Voter{},
+		&models.Participant{},
 		&models.Candidate{},
 		&models.VotingPeriod{},
 		&models.Vote{},

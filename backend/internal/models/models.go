@@ -54,6 +54,17 @@ type Vote struct {
 	Candidate   Candidate `json:"candidate"`
 }
 
+// Participant represents a participant registered at the event
+type Participant struct {
+	ID            uint      `gorm:"primaryKey" json:"id"`
+	Name          string    `json:"name" binding:"required"`
+	NIK           string    `gorm:"unique" json:"nik" binding:"required"` // National ID
+	SatuanKerja   string    `json:"satuan_kerja" binding:"required"`      // Work Unit/Department
+	IsProcessed   bool      `gorm:"default:false" json:"is_processed"`    // Whether voter account created
+	AssignedVoter *uint     `json:"assigned_voter"`                       // Link to voter if created
+	CreatedAt     time.Time `json:"created_at"`
+}
+
 // LoginRequest for voter/admin login
 type LoginRequest struct {
 	Username string `json:"username" binding:"required"`

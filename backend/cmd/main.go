@@ -37,6 +37,7 @@ func main() {
 	// Public routes
 	router.POST("/api/login", h.Login)
 	router.POST("/api/admin-login", h.AdminLogin)
+	router.POST("/api/register-participant", h.RegisterParticipant)
 
 	// Protected voter routes
 	voterGroup := router.Group("/api/voter")
@@ -66,6 +67,9 @@ func main() {
 		adminGroup.DELETE("/candidates/:id", h.DeleteCandidate)
 		adminGroup.POST("/reset-voting", h.ResetVoting)
 		adminGroup.POST("/generate-dummy-votes", h.GenerateDummyVotes)
+		adminGroup.GET("/participants", h.GetParticipants)
+		adminGroup.GET("/participants/export", h.ExportParticipantsCSV)
+		adminGroup.DELETE("/participants/:id", h.DeleteParticipant)
 	}
 
 	// Health check

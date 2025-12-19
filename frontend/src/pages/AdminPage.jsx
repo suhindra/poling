@@ -20,6 +20,7 @@ export default function AdminPage() {
   const [editForm, setEditForm] = useState({ name: '', photo: null, positions: [] })
   const [editPhotoPreview, setEditPhotoPreview] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [participants, setParticipants] = useState([])
   const positionOptions = ['ketua', 'sekretaris', 'bendahara', 'pengawas']
   const navigate = useNavigate()
 
@@ -42,6 +43,10 @@ export default function AdminPage() {
       const candidatesResponse = await adminService.listCandidates()
       console.log('Candidates response:', candidatesResponse.data)
       setCandidates(candidatesResponse.data || [])
+
+      const participantsResponse = await adminService.getParticipants()
+      console.log('Participants response:', participantsResponse.data)
+      setParticipants(participantsResponse.data.participants || [])
     } catch (err) {
       console.error('LoadDashboard Error:', err)
       const errorMsg = err.response?.data?.error || err.message || 'Failed to load dashboard'
@@ -312,6 +317,12 @@ export default function AdminPage() {
           onClick={() => setActiveTab('credentials')}
         >
           Generate Akun
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'participants' ? 'active' : ''}`}
+          onClick={() => setActiveTab('participants')}
+        >
+          Peserta
         </button>
       </div>
 
@@ -707,7 +718,103 @@ export default function AdminPage() {
             <p>Pilih tab untuk melihat konten</p>
           </div>
         )}
-      </div>
+        {activeTab === 'participants' && (
+          <div className="participants-section">
+            <h2>Manajemen Peserta</h2>
+            
+            <div className="participants-list">
+              <div className="participants-header">
+                <h3>Daftar Peserta</h3>
+                <div className="participants-actions">
+                  <button
+                    className="btn-export"
+                    onClick={async () => {
+                      try {
+                        const response = await adminService.exportParticipantsCSV()
+                        const url = window.URL.createObjectURL(new Blob([response.data]))
+                        const link = document.createElement('a')
+                        link.href = url
+                        link.setAttribute('download', 'participants.csv')
+                        document.body.appendChild(link)
+                        link.click()
+                        link.remove()
+                      } catch (err) {
+                        setError('Failed to export participants')
+                      }
+                    }}
+                  >
+                    📥 Export CSV
+                  </button>
+                </div>
+              </div>
+
+              {participants.length > 0 ? (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>No.</th>
+                      <th>Nama</th>
+                      <th>NIK</th>
+                      <th>Satuan Kerja</th>
+                      <th>Status</th>
+                      <th>Terdaftar</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {participants.map((participant, index) => (
+                      <tr key={participant.id}>
+                        <td>{index + 1}</td>
+                        <td>{participant.name}</td>
+                        <td><code>{participant.nik}</code></td>
+                        <td>{participant.satuan_kerja}</td>
+                        <td>
+                          <span className={`status-badge ${participant.is_processed ? 'active' : 'inactive'}`}>
+                            {participant.is_processed ? '✓ Diproses' : '⏳ Menunggu'}
+                          </span>
+                        </td>
+                        <td style={{fontSize: '12px'}}>{new Date(participant.created_at).toLocaleDateString('id-ID')}</td>
+                        <td>
+                          <button
+                            className="btn-delete"
+                            onClick={() => {
+                              if (window.confirm('Hapus peserta ini?')) {
+                                adminService.deleteParticipant(participant.id)
+                                  .then(() => loadDashboard())
+                                  .catch(err => setError(err.response?.data?.error || 'Failed to delete'))
+                              }
+                            }}
+                          >
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p style={{textAlign: 'center', color: '#999', padding: '20px'}}>
+                  📭 Belum ada peserta terdaftar
+                </p>
+              )}
+
+              <div className="participants-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Total Peserta</span>
+                  <span className="stat-value">{participants.length}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Sudah Diproses</span>
+                  <span className="stat-value">{participants.filter(p => p.is_processed).length}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Menunggu</span>
+                  <span className="stat-value">{participants.filter(p => !p.is_processed).length}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}      </div>
 
       {/* Edit Candidate Modal */}
       {showEditModal && editingCandidate && (

@@ -119,7 +119,16 @@ export const adminService = {
     api.post('/admin/reset-voting', {}),
   
   generateDummyVotes: () =>
-    api.post('/admin/generate-dummy-votes', {})
+    api.post('/admin/generate-dummy-votes', {}),
+
+  getParticipants: () =>
+    api.get('/admin/participants'),
+  
+  exportParticipantsCSV: () =>
+    api.get('/admin/participants/export'),
+  
+  deleteParticipant: (id) =>
+    api.delete(`/admin/participants/${id}`)
 }
 
 export default api
