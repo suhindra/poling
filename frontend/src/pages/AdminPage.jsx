@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { adminService, authService } from '../services/api'
-import { getAssetUrl } from '../config'
 import './AdminPage.css'
 
 const LOGO_URL = 'https://play-lh.googleusercontent.com/WvXMgnFd0izSLUItWTp_WZf-BDPt_Wnjg8li-Kv87UUEB2VyGTGISKvrEMO2qeYovPA'
@@ -155,7 +154,7 @@ export default function AdminPage() {
     // Parse positions from candidate.positions (string format "ketua,sekretaris")
     const positions = candidate.positions ? candidate.positions.split(',').map(p => p.trim()) : []
     setEditForm({ name: candidate.name, photo: null, positions })
-    setEditPhotoPreview(candidate.photo_path ? getAssetUrl(candidate.photo_path) : null)
+    setEditPhotoPreview(candidate.photo_path ? `http://localhost:8080${candidate.photo_path}` : null)
     setShowEditModal(true)
   }
 
@@ -427,7 +426,7 @@ export default function AdminPage() {
                                 <div className="vote-candidate-photo">
                                   {vote.photo_path ? (
                                     <img 
-                                      src={getAssetUrl(vote.photo_path)} 
+                                      src={`http://localhost:8080${vote.photo_path}`} 
                                       alt={vote.name}
                                       onError={(e) => {
                                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23e5e7eb" width="100" height="100"/%3E%3Ctext x="50" y="50" font-size="40" fill="%239ca3af" text-anchor="middle" dy=".3em"%3E?%3C/text%3E%3C/svg%3E'
@@ -475,7 +474,7 @@ export default function AdminPage() {
                                 <div className="vote-candidate-photo">
                                   {vote.photo_path ? (
                                     <img 
-                                      src={getAssetUrl(vote.photo_path)} 
+                                      src={`http://localhost:8080${vote.photo_path}`} 
                                       alt={vote.name}
                                       onError={(e) => {
                                         e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23e5e7eb" width="100" height="100"/%3E%3Ctext x="50" y="50" font-size="40" fill="%239ca3af" text-anchor="middle" dy=".3em"%3E?%3C/text%3E%3C/svg%3E'
@@ -587,7 +586,7 @@ export default function AdminPage() {
                       <td>
                         {candidate.photo_path ? (
                           <img 
-                            src={getAssetUrl(candidate.photo_path)} 
+                            src={`http://localhost:8080${candidate.photo_path}`} 
                             alt={candidate.name}
                             className="candidate-thumbnail"
                             style={{width: '50px', height: '50px', objectFit: 'cover', borderRadius: '5px'}}
