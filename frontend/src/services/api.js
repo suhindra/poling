@@ -60,7 +60,10 @@ export const voterService = {
   submitVote: (candidateId) =>
     api.post('/voter/vote', { candidate_id: candidateId }),
   
-  getVotingStatus: () => api.get('/voter/voting-status')
+  getVotingStatus: () => api.get('/voter/voting-status'),
+
+  getSelectedCandidatesInOtherPositions: () =>
+    api.get('/voter/selected-candidates-other-positions')
 }
 
 // Admin Service

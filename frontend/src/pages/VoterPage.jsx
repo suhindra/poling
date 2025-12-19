@@ -15,6 +15,7 @@ export default function VoterPage() {
   const [submitted, setSubmitted] = useState(false)
   const [periodClosed, setPeriodClosed] = useState(false)
   const [reloadMessage, setReloadMessage] = useState('')
+  const [selectedCandidatesOtherPositions, setSelectedCandidatesOtherPositions] = useState([])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -47,6 +48,11 @@ export default function VoterPage() {
         const candidatesResponse = await voterService.getCandidates()
         console.log('Candidates Response:', candidatesResponse)
         setCandidates(candidatesResponse.data?.candidates || [])
+
+        // Get selected candidates in other positions
+        const selectedResponse = await voterService.getSelectedCandidatesInOtherPositions()
+        console.log('Selected Candidates Response:', selectedResponse)
+        setSelectedCandidatesOtherPositions(selectedResponse.data?.selected_candidate_ids || [])
       }
 
       const statusResponse = await voterService.getVotingStatus()
@@ -220,39 +226,51 @@ export default function VoterPage() {
               </div>
               
               <div className="candidates-grid">
-                {candidates.map((candidate) => (
-                  <label key={candidate.id} className={`candidate-card ${selectedCandidate === candidate.id ? 'selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="candidate"
-                      value={candidate.id}
-                      checked={selectedCandidate === candidate.id}
-                      onChange={() => setSelectedCandidate(candidate.id)}
-                      style={{display: 'none'}}
-                    />
-                    <div className="card-photo">
-                      {candidate.photo_path ? (
-                        <img src={`http://159.65.11.4${candidate.photo_path}`} alt={candidate.name} />
-                      ) : (
-                        <div className="placeholder-photo">
-                          <span className="photo-icon">👤</span>
-                        </div>
-                      )}
-                      <div className="card-number-badge">#{candidate.number}</div>
-                    </div>
-                    <div className="card-content">
-                      <h4 className="candidate-name">{candidate.name}</h4>
-                      <div className="card-check">
-                        <div className={`radio-custom ${selectedCandidate === candidate.id ? 'checked' : ''}`}>
-                          {selectedCandidate === candidate.id && <span>✓</span>}
-                        </div>
-                        <span className="select-text">
-                          {selectedCandidate === candidate.id ? 'Terpilih' : 'Pilih'}
-                        </span>
+                {candidates.map((candidate) => {
+                  // Check if this candidate already won/selected in another position
+                  const isDisabled = selectedCandidatesOtherPositions.includes(candidate.id)
+
+                  return (
+                    <label 
+                      key={candidate.id} 
+                      className={`candidate-card ${selectedCandidate === candidate.id ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name="candidate"
+                        value={candidate.id}
+                        checked={selectedCandidate === candidate.id}
+                        onChange={() => !isDisabled && setSelectedCandidate(candidate.id)}
+                        disabled={isDisabled}
+                        style={{display: 'none'}}
+                      />
+                      <div className="card-photo">
+                        {candidate.photo_path ? (
+                          <img src={`http://159.65.11.4${candidate.photo_path}`} alt={candidate.name} />
+                        ) : (
+                          <div className="placeholder-photo">
+                            <span className="photo-icon">👤</span>
+                          </div>
+                        )}
+                        <div className="card-number-badge">#{candidate.number}</div>
+                        {isDisabled && (
+                          <div className="already-selected-badge">✓ Sudah Terpilih</div>
+                        )}
                       </div>
-                    </div>
-                  </label>
-                ))}
+                      <div className="card-content">
+                        <h4 className="candidate-name">{candidate.name}</h4>
+                        <div className="card-check">
+                          <div className={`radio-custom ${selectedCandidate === candidate.id ? 'checked' : ''}`}>
+                            {selectedCandidate === candidate.id && <span>✓</span>}
+                          </div>
+                          <span className="select-text">
+                            {selectedCandidate === candidate.id ? 'Terpilih' : 'Pilih'}
+                          </span>
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
 
               {error && <div className="error-message">❌ {error}</div>}

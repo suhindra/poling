@@ -152,6 +152,36 @@ func (h *Handlers) GetCandidatesForPeriod(c *gin.Context) {
 	})
 }
 
+// GetSelectedCandidatesInOtherPositions returns candidates already selected for other positions
+func (h *Handlers) GetSelectedCandidatesInOtherPositions(c *gin.Context) {
+	var period models.VotingPeriod
+	// Use Find instead of First to avoid error logs
+	result := h.db.Where("is_open = ?", true).Limit(1).Find(&period)
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusOK, gin.H{"selected_candidate_ids": []uint{}})
+		return
+	}
+
+	// Get all closed positions (finished voting)
+	var closedPeriods []models.VotingPeriod
+	if err := h.db.Where("is_open = ? AND winner != 0", false).Find(&closedPeriods).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch closed periods"})
+		return
+	}
+
+	// Extract winner IDs
+	selectedCandidateIDs := make([]uint, 0)
+	for _, period := range closedPeriods {
+		if period.Winner != 0 {
+			selectedCandidateIDs = append(selectedCandidateIDs, period.Winner)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"selected_candidate_ids": selectedCandidateIDs,
+	})
+}
+
 // SubmitVote records a vote
 func (h *Handlers) SubmitVote(c *gin.Context) {
 	voterID, _ := c.Get("userID")

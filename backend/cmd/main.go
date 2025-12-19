@@ -47,6 +47,7 @@ func main() {
 		voterGroup.GET("/candidates", h.GetCandidatesForPeriod)
 		voterGroup.POST("/vote", h.SubmitVote)
 		voterGroup.GET("/voting-status", h.GetVotingStatus)
+		voterGroup.GET("/selected-candidates-other-positions", h.GetSelectedCandidatesInOtherPositions)
 	}
 
 	// Protected admin routes
