@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { voterService, authService } from '../services/api'
+import { getAssetUrl } from '../config'
 import './VoterPage.css'
 
 const LOGO_URL = 'https://play-lh.googleusercontent.com/WvXMgnFd0izSLUItWTp_WZf-BDPt_Wnjg8li-Kv87UUEB2VyGTGISKvrEMO2qeYovPA'
@@ -224,7 +225,7 @@ export default function VoterPage() {
                     />
                     <div className="card-photo">
                       {candidate.photo_path ? (
-                        <img src={`http://localhost:8080${candidate.photo_path}`} alt={candidate.name} />
+                        <img src={getAssetUrl(candidate.photo_path)} alt={candidate.name} />
                       ) : (
                         <div className="placeholder-photo">
                           <span className="photo-icon">👤</span>
