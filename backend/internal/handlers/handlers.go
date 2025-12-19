@@ -133,7 +133,7 @@ func (h *Handlers) GetCandidatesForPeriod(c *gin.Context) {
 	}
 
 	var candidates []models.Candidate
-	if err := h.db.Where("is_active = ?", true).Order("number ASC").Find(&candidates).Error; err != nil {
+	if err := h.db.Where("is_active = ? OR id IN (SELECT DISTINCT candidate_id FROM votes WHERE position = ?)", true, period.Position).Order("number ASC").Find(&candidates).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch candidates"})
 		return
 	}
@@ -290,6 +290,11 @@ func (h *Handlers) OpenVotingPeriod(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to open period"})
 		return
 	}
+
+	// Reactivate candidates for this position that had won previously
+	h.db.Model(&models.Candidate{}).
+		Where("id IN (SELECT winner FROM voting_periods WHERE position = ? AND winner IS NOT NULL)", req.Position).
+		Update("is_active", true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "voting period opened"})
 }
