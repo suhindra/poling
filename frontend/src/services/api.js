@@ -89,7 +89,7 @@ export const adminService = {
   
   createCandidateWithPhoto: (formData, positions = []) => {
     if (positions.length > 0) {
-      formData.append('positions', JSON.stringify(positions))
+      formData.append('positions', positions.join(','))
     }
     return api.post('/admin/candidates', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
@@ -104,9 +104,11 @@ export const adminService = {
   updateCandidate: (id, name, positions = []) =>
     api.put(`/admin/candidates/${id}`, { name, positions }),
   
-  updateCandidateWithPhoto: (id, formData) => {
-    if (!formData.has('positions')) {
-      formData.append('positions', JSON.stringify([]))
+  updateCandidateWithPhoto: (id, formData, positions = []) => {
+    if (positions.length > 0) {
+      formData.append('positions', positions.join(','))
+    } else if (!formData.has('positions')) {
+      formData.append('positions', '')
     }
     return api.put(`/admin/candidates/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
