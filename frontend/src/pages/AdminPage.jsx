@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { adminService, authService } from '../services/api'
 import './AdminPage.css'
 
-const LOGO_URL = 'https://play-lh.googleusercontent.com/WvXMgnFd0izSLUItWTp_WZf-BDPt_Wnjg8li-Kv87UUEB2VyGTGISKvrEMO2qeYovPA'
+import logoImage from '../assets/koperasi-logo.jpeg'
+const LOGO_URL = logoImage
 
 export default function AdminPage() {
   const [dashboard, setDashboard] = useState(null)
