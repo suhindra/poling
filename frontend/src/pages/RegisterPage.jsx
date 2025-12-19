@@ -51,10 +51,10 @@ export default function RegisterPage() {
       setSuccess(true)
       setFormData({ name: '', nik: '', satuan_kerja: '' })
       
-      // Redirect to login after 2 seconds
+      // Clear success message after 3 seconds
       setTimeout(() => {
-        navigate('/login')
-      }, 2000)
+        setSuccess(false)
+      }, 3000)
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.')
     } finally {
