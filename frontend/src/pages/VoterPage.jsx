@@ -224,7 +224,7 @@ export default function VoterPage() {
                     />
                     <div className="card-photo">
                       {candidate.photo_path ? (
-                        <img src={`http://localhost:8080${candidate.photo_path}`} alt={candidate.name} />
+                        <img src={`http://159.65.11.4${candidate.photo_path}`} alt={candidate.name} />
                       ) : (
                         <div className="placeholder-photo">
                           <span className="photo-icon">👤</span>
